@@ -12,9 +12,9 @@ Files to be processed should have a *.process* extension.
 
 ## Creating a Component
 
-Components are stored in a folder called **.components**
+Components are stored in a folder called **components**
 
-The processor will read the files in **.components** and store them until they are needed
+The processor will read the files in the **components** dir and store them until they are needed
 
 The syntax goes as follow:
 

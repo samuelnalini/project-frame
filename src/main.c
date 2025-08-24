@@ -7,27 +7,25 @@
 #include "lib/component.h"
 #include "lib/file_vec.h"
 
-int main(int argc, char* argv[]) {
+int main(int argc, char *argv[]) {
     if (argc < 2) {
         fprintf(stderr, "Usage: process [project_dir]\n");
         return 1;
     }
 
     // open the project directory for processing
-    DIR* project_dir = open_dir(argv[1]);
+    DIR *project_dir = open_dir(argv[1]);
 
     if (!project_dir) {
         return 1; // fatal
     }
 
     // find the components dir and read it
-    char* component_path;
-    append_str(argv[1], "/components", component_path);
-
-    DIR* component_dir = open_dir(component_path);
+    char *component_path = append_str(argv[1], "/components");
+    DIR *component_dir = open_dir(component_path);
 
     if (!component_dir) {
-        fprintf(stderr, "Could not find 'components'\n");
+        fprintf(stderr, "Could not find %s\n", component_path);
         return 1; // fatal
     }
 

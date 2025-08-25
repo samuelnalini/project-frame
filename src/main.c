@@ -13,15 +13,20 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
+    char *project_path = argv[1];
+
     // open the project directory for processing
-    DIR *project_dir = open_dir(argv[1]);
+    DIR *project_dir = open_dir(project_path);
 
     if (!project_dir) {
         return 1; // fatal
     }
+    
+    if (project_path[strlen(project_path) - 1] != '/')
+        project_path[strlen(project_path)] = '/';
 
     // find the components dir and read it
-    char *component_path = append_str(argv[1], "/components");
+    char *component_path = append_str(argv[1], "components");
     DIR *component_dir = open_dir(component_path);
 
     if (!component_dir) {
@@ -35,12 +40,12 @@ int main(int argc, char *argv[]) {
     file_vec_init(&components);
     file_vec_init(&files_to_process);
 
-    get_files_from_dir(component_dir, &components);
+    get_files_from_dir(component_path, &components);
     // load components, perhaps into an arena?
     load_components_from_vector(&components);
 
     // look for .process files in the project dir
-    get_files_with_ext(project_dir, ".process", &files_to_process);
+    get_files_with_ext(argv[1], ".process", &files_to_process);
     // store file pointers somewhere
 
     process_file_vector(&files_to_process);

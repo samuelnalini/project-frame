@@ -33,3 +33,6 @@ Once a component is created, it can be referenced in *.process* files.
 ```
 ${MyComponent}
 ```
+
+
+This project is on the backburner a bit as I'm working on learning new concepts in C. I did not abandon it.

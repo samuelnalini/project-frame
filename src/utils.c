@@ -12,25 +12,43 @@ DIR *open_dir(char* dir_path) {
     return dir;
 }
 
+FILE *open_file(char *file_path) {
+    if (!file_path)
+        return NULL;
+
+    FILE *fp = fopen(file_path, "r");
+    if (!fp) {
+        fprintf(stderr, "Could not open file '%s'\n", file_path);
+        return NULL;
+    }
+
+    return fp;
+}
+
 int get_files_from_dir(char *dir_path, FILE_VEC* vec) {
     // populate file_vec with FILE*
-    
+
     DIR *dir = open_dir(dir_path);
 
     if (dir == NULL)
         return -1;
-    
-    printf("%s\n", dir_path);
-    struct dirent *folder;
-    while ((folder = readdir(dir)) != NULL) {
-        printf("%s\n", folder->d_name);
+
+    if (dir_path[strlen(dir_path)] != '/') {
+        dir_path = append_str(dir_path, "/");
     }
 
-    return 0;
-}
+    //    printf("%s\n", dir_path);
+    struct dirent *entry;
+    while ((entry = readdir(dir)) != NULL) {
+        if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
+            continue;
 
-int get_files_with_ext(char *dir_path, const char* ext, FILE_VEC* vec) {
-    // return a dynamic array of files
+        printf("opening %s\n", entry->d_name);
+        char *file_path = append_str(dir_path, entry->d_name);
+
+        FILE *file = open_file(file_path);
+        file_vec_append(vec, file);
+    }
 
     return 0;
 }

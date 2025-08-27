@@ -45,7 +45,7 @@ int main(int argc, char *argv[]) {
     load_components_from_vector(&components);
 
     // look for .process files in the project dir
-    get_files_with_ext(argv[1], ".process", &files_to_process);
+    //TODO: get_files_with_ext(argv[1], ".process", &files_to_process);
     // store file pointers somewhere
 
     process_file_vector(&files_to_process);

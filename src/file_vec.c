@@ -4,9 +4,10 @@ void file_vec_init(FILE_VEC *vec) {
     vec->count = 0;
     vec->capacity = 0;
     vec->vec = NULL;
+    puts("vector zeroed");
 }
 
-int file_vec_push(FILE_VEC *vec, FILE *value) {
+int file_vec_append(FILE_VEC *vec, FILE *value) {
     if (vec->count + 1 > vec->capacity) {
         uint16_t new_capacity = vec->capacity > 4 ? vec->capacity * 2 : 4;
         FILE **new_vec = realloc(vec->vec, sizeof(FILE*) * new_capacity);
@@ -21,24 +22,25 @@ int file_vec_push(FILE_VEC *vec, FILE *value) {
     }
 
     vec->vec[vec->count++] = value;
+    printf("appended to vector: %d\n", vec->count);
     return 0;
 }
 
 int file_vec_pop(FILE_VEC *vec) {
-    if (vec->count > 0) {
-        fclose(vec->vec[vec->count - 1]);
-        vec->count--;
-    }
-    else
+    if (vec->count <= 0)
         return -1;
+
+    fclose(vec->vec[vec->count - 1]);
+    vec->count--;
+    printf("popped from vector: %d\n", vec->count);
 }
 
 void file_vec_free(FILE_VEC *vec) {
-    for (size_t i = 0; i < vec->count; ++i) {
-        if (vec->vec[i])
-            fclose(vec->vec[i]);
+    for (size_t i = vec->count; i > 0; --i) {
+        file_vec_pop(vec);
     }
 
     free(vec->vec);
     file_vec_init(vec);
+    puts("cleaned up vector");
 }

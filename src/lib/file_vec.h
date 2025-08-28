@@ -9,13 +9,24 @@
 #include <sys/types.h>
 
 typedef struct {
+    char *dir;
+    char *name;
+    FILE *ptr;
+} File;
+
+typedef struct {
     uint16_t count;
     uint16_t capacity;
-    FILE **vec;
+    File **vec;
 } FILE_VEC;
 
 void file_vec_init(FILE_VEC *vec);
-int file_vec_append(FILE_VEC *vec, FILE *value);
+void file_vec_free(FILE_VEC *vec);
+
+int file_vec_append(FILE_VEC *vec, File *value);
 int file_vec_pop(FILE_VEC *vec);
 int file_vec_erase(FILE_VEC *vec, int index);
-void file_vec_free(FILE_VEC *vec);
+
+void file_init(File *file);
+void file_free(File *file);
+

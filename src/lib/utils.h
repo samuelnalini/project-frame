@@ -10,7 +10,7 @@
 #include "file_vec.h"
 
 DIR *open_dir(char *dir_path);
-FILE *open_file(char *file_path);
+File *open_file(char *file_path, char *dir_path);
 int get_files_from_dir(char *dir_path, FILE_VEC *file_vec);
 
 char *append_str(char *dst, const char *src);

@@ -34,15 +34,15 @@ int main(int argc, char *argv[]) {
         return 1; // fatal
     }
 
-    FILE_VEC components;
+    FILE_VEC component_files;
     FILE_VEC files_to_process;
 
-    file_vec_init(&components);
+    file_vec_init(&component_files);
     file_vec_init(&files_to_process);
 
-    get_files_from_dir(component_path, &components);
+    get_files_from_dir(component_path, &component_files);
     // load components, perhaps into an arena?
-    load_components_from_vector(&components);
+    load_components_from_vector(&component_files);
 
     // look for .process files in the project dir
     //TODO: get_files_with_ext(argv[1], ".process", &files_to_process);
@@ -52,7 +52,7 @@ int main(int argc, char *argv[]) {
     
     closedir(project_dir);
     closedir(component_dir);
-    file_vec_free(&components);
+    file_vec_free(&component_files);
     file_vec_free(&files_to_process);
     return 0;
 }

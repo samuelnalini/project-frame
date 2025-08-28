@@ -11,6 +11,8 @@ void file_init(File *file) {
 void file_free(File *file) {
     if (!file) return;
     if (file->ptr) fclose(file->ptr);
+    if (file->name) free(file->name); // alloced from realpath
+    if (file->dir) free(file->dir); // alloced from realpath
 
     file_init(file);
     puts("file freed");

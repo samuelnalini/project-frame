@@ -19,7 +19,7 @@ int main(int argc, char *argv[]) {
     DIR *project_dir = open_dir(project_path);
 
     if (!project_dir) {
-        return 1; // fatal
+        return 1;
     }
     
     if (project_path[strlen(project_path) - 1] != '/')
@@ -31,7 +31,7 @@ int main(int argc, char *argv[]) {
 
     if (!component_dir) {
         fprintf(stderr, "Could not find %s\n", component_path);
-        return 1; // fatal
+        return 1;
     }
 
     FILE_VEC component_files;

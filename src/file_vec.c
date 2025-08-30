@@ -6,6 +6,7 @@ void file_init(File *file) {
     file->dir = NULL;
     file->name = NULL;
     file->ptr = NULL;
+    file->file_size = 0;
 }
 
 void file_free(File *file) {

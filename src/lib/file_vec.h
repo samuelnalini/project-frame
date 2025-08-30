@@ -12,6 +12,7 @@ typedef struct {
     char *dir;
     char *name;
     FILE *ptr;
+    size_t file_size;
 } File;
 
 typedef struct {

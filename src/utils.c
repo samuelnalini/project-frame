@@ -37,11 +37,35 @@ File *open_file(char *file_path, char *dir_path) {
 	return NULL;
     }
 
+    size_t file_size = get_file_size(fp);
+
+    if (file_size < 0) {
+	file_free(file);
+	return NULL;
+    }
+
     file->dir = realpath(dir_path, NULL);
     file->name = realpath(file_path, NULL);
     file->ptr = fp;
+    file->file_size = file_size;
     
     return file;
+}
+
+size_t get_file_size(FILE *fd) {
+    if (!fd) return -1;
+    
+    fseek(fd, 0L, SEEK_END);
+    long size = ftell(fd);
+
+    if (size < 0) {
+	perror("Call to ftell failed");
+	return -1;
+    }
+    
+    rewind(fd);
+    
+    return (size_t)size;
 }
 
 int get_files_from_dir(char *dir_path, FILE_VEC* vec) {

@@ -1,16 +1,10 @@
 #include "lib/component.h"
+#include "lib/utils.h"
+#include "lib/parser.h"
 
 #include <stdio.h>
 #include <stddef.h>
 #include <stdlib.h>
-
-static size_t get_file_size(FILE *fd) {
-    fseek(fd, 0L, SEEK_END);
-    long size = ftell(fd);
-    rewind(fd);
-    
-    return (size_t)size;
-}
 
 static char *read_file_into_buf(FILE *fd) {
     size_t file_size = get_file_size(fd);
@@ -44,6 +38,7 @@ int load_components_from_file(File *file) {
     printf("loading file '%s'\n", file->name);
 
     // pass the file into the parser
+    parse_buffer(buf);
     
     free(buf);
     return 0;
@@ -53,7 +48,7 @@ int load_components_from_vector(FILE_VEC *vector) {
     puts("loading components from vector");
     for (size_t i = 0; i < vector->count; ++i) {
 	File *file = vector->vec[i];
-	printf("file: '%s'\ndir: '%s'\nptr: %p\n", file->name, file->dir, file->ptr);
+	printf("file: '%s'\ndir: '%s'\nptr: %p\nsize: %zu\n", file->name, file->dir, file->ptr, file->file_size);
 
 	load_components_from_file(file);
     }

@@ -10,8 +10,7 @@ void init_lexer(Lexer *lexer) {
 }
 
 Lexer *config_lexer(Lexer *lexer, char *buf) {
-    if (!lexer || !buf) return;
-
+    if (!lexer || !buf) return NULL;
     init_lexer(lexer);
     lexer->line = 1;
     lexer->buf = buf;
@@ -62,15 +61,15 @@ static Token make_token(TokenType type, char *start, size_t length, int line) {
 	.start = start,
 	.length = length,
 	.line = line
-    }
+    };
 }
 
-static Token single_ch_token(TokenType type) {
-    return make_token(type, lexer->buf[lexer->index - 1], 1, lexer->line);
+static Token single_ch_token(Lexer *lexer, TokenType type) {
+    return make_token(type, &lexer->buf[lexer->index - 1], 1, lexer->line);
 }
 
-static Token double_ch_token(TokenType type) {
-    return make_token(type, lexer->buf[lexer->index - 2], 2, lexer->line);
+static Token double_ch_token(Lexer *lexer, TokenType type) {
+    return make_token(type, &lexer->buf[lexer->index - 2], 2, lexer->line);
 }
 
 static Token error(Lexer *lexer, const char *message, int line) {
@@ -88,7 +87,7 @@ static Token error(Lexer *lexer, const char *message, int line) {
 	lexer->line++;
     }
     
-    return make_token(TOKEN_ERR, lexer->buf[lexer->index], 0, line);
+    return make_token(TOKEN_ERR, &lexer->buf[lexer->index], 0, line);
 }
 
 static Token number(Lexer *lexer) {
@@ -142,7 +141,7 @@ static Token number(Lexer *lexer) {
 	}
     }
 
-    return make_token(type, lexer->buf[start], (lexer->index - start), line);
+    return make_token(type, &lexer->buf[start], (lexer->index - start), line);
 }
 
 static void rollback(Lexer *lexer, int index, int line) {
@@ -176,7 +175,7 @@ static Token string(Lexer *lexer) {
 	advance(lexer);
     }
 
-    return make_token(TOKEN_STR_LIT, lexer->buf[start + 1], (lexer->index - 1) - (start + 1), line);
+    return make_token(TOKEN_STR_LIT, &lexer->buf[start + 1], (lexer->index - 1) - (start + 1), line);
 }
 
 static Token identifier(Lexer *lexer) {
@@ -199,29 +198,29 @@ static Token identifier(Lexer *lexer) {
 	advance(lexer);
     }
 
-    return make_token(TOKEN_IDENT, lexer->buf[start], (lexer->index - start), line);
+    return make_token(TOKEN_IDENT, &lexer->buf[start], (lexer->index - start), line);
 }
 
 Token get_token(Lexer *lexer) {
     skip_whitespace(lexer);
 
     if (at_eof(lexer))
-	return make_token(TOKEN_EOF, strlen(lexer - 1), 0, lexer->line);
+	return make_token(TOKEN_EOF, &lexer->buf[lexer->index - 1], 0, lexer->line);
     
     char ch = lexer->buf[lexer->index];
     switch(ch) {
     case '(':
 	advance(lexer);
-	return single_ch_token(TOKEN_LPAREN);
+	return single_ch_token(lexer, TOKEN_LPAREN);
     case ')':
 	advance(lexer);
-	return single_ch_token(TOKEN_RPAREN);
+	return single_ch_token(lexer, TOKEN_RPAREN);
     case '{':
 	advance(lexer);
-	return single_ch_token(TOKEN_LSQRLY);
+	return single_ch_token(lexer, TOKEN_LSQRLY);
     case '}':
 	advance(lexer);
-	return single_ch_token(TOKEN_RSQRLY);
+	return single_ch_token(lexer, TOKEN_RSQRLY);
     case '"':
 	return string(lexer);
     default:
@@ -232,6 +231,6 @@ Token get_token(Lexer *lexer) {
 	    return identifier(lexer);
 
 	advance(lexer);
-	return make_token(TOKEN_UNK, lexer->buf[lexer->index - 1], 1, lexer->line);
+	return make_token(TOKEN_UNK, &lexer->buf[lexer->index - 1], 1, lexer->line);
     }
 }

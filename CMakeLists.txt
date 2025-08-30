@@ -11,5 +11,7 @@ add_executable(process
     ${SOURCE}/processor.c
     ${SOURCE}/utils.c
     ${SOURCE}/component.c
+    ${SOURCE}/lexer.c
+    ${SOURCE}/parser.c
     ${SOURCE}/file_vec.c
 )

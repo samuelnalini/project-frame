@@ -38,9 +38,17 @@ int load_components_from_file(File *file) {
     printf("loading file '%s'\n", file->name);
 
     // pass the file into the parser
-    parse_buffer(buf);
+    Parser parser;
+    Lexer lexer;
+    init_lexer(&lexer);
+
+    config_lexer(&lexer, buf);
+    config_parser(&parser, &lexer);
     
-    free(buf);
+    parse_file(&parser);
+
+    free_parser(&parser);
+    free_lexer(&lexer); // the lexer will free the buffer
     return 0;
 }
 

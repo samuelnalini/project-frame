@@ -1,5 +1,6 @@
 #include "lib/utils.h"
 #include "lib/file_vec.h"
+#include "lib/lexer.h"
 
 #include <limits.h>
 #include <stdlib.h>
@@ -115,4 +116,24 @@ char *append_str(char* dst, const char* src) {
     final_string[final_len] = '\0';
 
     return final_string;
+}
+
+char *get_token_type_str(TokenType type) {
+    switch(type) {
+    case TOKEN_EOF: return "TOKEN_EOF";
+    case TOKEN_ERR: return "TOKEN_ERR";
+    case TOKEN_UNK: return "TOKEN_UNK";
+    case TOKEN_KEYWORD: return "TOKEN_KEYWORD";
+    case TOKEN_INT_LIT: return "TOKEN_INT_LIT";
+    case TOKEN_STR_LIT: return "TOKEN_STR_LIT";
+    case TOKEN_FLOAT_LIT: return "TOKEN_FLOAT_LIT";
+    case TOKEN_DOUBLE_LIT: return "TOKEN_DOUBLE_LIT";
+    case TOKEN_CHR_LIT: return "TOKEN_CHR_LIT";
+    case TOKEN_IDENT: return "TOKEN_IDENT";
+    case TOKEN_LSQRLY: return "TOKEN_LSQRLY";
+    case TOKEN_RSQRLY: return "TOKEN_RSQRLY";
+    case TOKEN_LPAREN: return "TOKEN_LPAREN";
+    case TOKEN_RPAREN: return "TOKEN_RPAREN";
+    default: return "Unknown Token Type";
+    }
 }

@@ -1,5 +1,18 @@
 #pragma once
 
-#include <stdbool.h>
+#include "lexer.h"
 
-bool parse_buffer(char *buf);
+#include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct {
+    Lexer *lexer;
+    Token token;
+} Parser;
+
+void init_parser(Parser *parser);
+Parser *config_parser(Parser *parser, Lexer *lexer);
+void free_parser(Parser *parser);
+
+void parse_file(Parser *parser);

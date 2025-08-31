@@ -1,6 +1,7 @@
 #include "lib/lexer.h"
 
 #include <ctype.h>
+#include <stdlib.h>
 
 void init_lexer(Lexer *lexer) {
     if (!lexer) return;
@@ -19,7 +20,7 @@ Lexer *config_lexer(Lexer *lexer, char *buf) {
 
 void free_lexer(Lexer *lexer) {
     if (!lexer) return;
-    //if (lexer->buf) free(lexer->buf); // holding off for now because it's a ptr to the actual thing
+    if (lexer->buf) free(lexer->buf);
     init_lexer(lexer);
 }
 
@@ -151,9 +152,10 @@ static void rollback(Lexer *lexer, int index, int line) {
 }
 
 static Token string(Lexer *lexer) {
+    advance(lexer); // consume the "
     int start = lexer->index;
     int line = lexer->line;
-
+    
     while (true) {
 	if (at_eof(lexer)) {
 	    rollback(lexer, start, line);
@@ -162,8 +164,8 @@ static Token string(Lexer *lexer) {
 
 	char ch = lexer->buf[lexer->index];
 	if (ch == '\n') {
-	    lexer->line++;
 	    advance(lexer);
+	    lexer->line++;
 	    continue;
 	}
 
@@ -175,7 +177,33 @@ static Token string(Lexer *lexer) {
 	advance(lexer);
     }
 
-    return make_token(TOKEN_STR_LIT, &lexer->buf[start + 1], (lexer->index - 1) - (start + 1), line);
+    return make_token(TOKEN_STR_LIT, &lexer->buf[start], (lexer->index - start - 1), line);
+}
+
+static Token character(Lexer *lexer) {
+    advance(lexer); // consume the '
+    int start = lexer->index;
+    int line = lexer->index;
+
+    int charLen = 1;
+    if (lexer->buf[start] == '\\') {
+	// this is an escaped character like \n
+	charLen = 2; // increment the char's length and consume the backslash
+	advance(lexer);
+    }
+
+    if (!isalnum(lexer->buf[lexer->index])) {
+	return error(lexer, "Invalid character literal", line);
+    }
+
+    advance(lexer); // consume the actual character
+    
+    if (lexer->buf[lexer->index] != '\'') { // check the closing '
+	return error(lexer, "Unterminated character literal", line);
+    }
+
+    advance(lexer); // consume the final '
+    return make_token(TOKEN_CHR_LIT, &lexer->buf[start], charLen, line);
 }
 
 static Token identifier(Lexer *lexer) {
@@ -191,7 +219,6 @@ static Token identifier(Lexer *lexer) {
 	    break;
 
 	if (ch == '\n') {
-	    lexer->line++;
 	    break;
 	}
 
@@ -223,6 +250,8 @@ Token get_token(Lexer *lexer) {
 	return single_ch_token(lexer, TOKEN_RSQRLY);
     case '"':
 	return string(lexer);
+    case '\'':
+	return character(lexer);
     default:
 	if (isdigit(ch))
 	    return number(lexer);

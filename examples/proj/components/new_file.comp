@@ -1,9 +1,12 @@
-hello world
-from
-this
-"file
+float hello = 6.0f;
 
-'c'
-'\k'
+=
+==
+-=
++=
+-
++
+!
+!=
 
-'c
+return

@@ -120,20 +120,44 @@ char *append_str(char* dst, const char* src) {
 
 char *get_token_type_str(TokenType type) {
     switch(type) {
+    case TOKEN_KEYWORD: return "TOKEN_KEYWORD";
+    case TOKEN_IDENT: return "TOKEN_IDENT";
+    case TOKEN_TYPE: return "TOKEN_TYPE";
+    case TOKEN_INT_LIT: return "TOKEN_INT_LIT [I32]";
+    case TOKEN_STR_LIT: return "TOKEN_STR_LIT [string]";
+    case TOKEN_FLOAT_LIT: return "TOKEN_FLOAT_LIT [F32]";
+    case TOKEN_DOUBLE_LIT: return "TOKEN_DOUBLE_LIT [F64]";
+    case TOKEN_CHR_LIT: return "TOKEN_CHR_LIT [char]";
+    case TOKEN_LSQRLY: return "TOKEN_LSQRLY [{]";
+    case TOKEN_RSQRLY: return "TOKEN_RSQRLY [}]";
+    case TOKEN_LPAREN: return "TOKEN_LPAREN [(]";
+    case TOKEN_RPAREN: return "TOKEN_RPAREN [)]";
+    case TOKEN_EQ: return "TOKEN_EQ [=]";
+    case TOKEN_EQEQ: return "TOKEN_EQEQ [==]";
+    case TOKEN_NE: return "TOKEN_NE [!=]";
+    case TOKEN_GE: return "TOKEN_GE [>=]";
+    case TOKEN_PLEQ: return "TOKEN_PLEQ [+=]";
+    case TOKEN_MNEQ: return "TOKEN_MNEQ [-=]";
+    case TOKEN_LE: return "TOKEN_LE [<=]";
+    case TOKEN_LT: return "TOKEN_LT [<]";
+    case TOKEN_GT: return "TOKEN_GT [>]";
+    case TOKEN_PLUS: return "TOKEN_PLUS [+]";
+    case TOKEN_MINUS: return "TOKEN_MINUS [-]";
+    case TOKEN_INC: return "TOKEN_INC [++]";
+    case TOKEN_DEC: return "TOKEN_DEC [--]";
+    case TOKEN_AND: return "TOKEN_AND [&&]";
+    case TOKEN_OR: return "TOKEN_OR [||]";
+    case TOKEN_BITOR: return "TOKEN_BITOR [|]";
+    case TOKEN_BITAND: return "TOKEN_BITAND [&]";
+    case TOKEN_NEGATE: return "TOKEN_NEGATE [!]";
+    case TOKEN_STAR: return "TOKEN_STAR [*]";
+    case TOKEN_SLASH: return "TOKEN_SLASH [/]";
+    case TOKEN_MOD: return "TOKEN_MOD [%]";
+    case TOKEN_EXP: return "TOKEN_EXP [^]";
+    case TOKEN_SEMICOLON: return "TOKEN_SEMICOLON [;]";
     case TOKEN_EOF: return "TOKEN_EOF";
     case TOKEN_ERR: return "TOKEN_ERR";
     case TOKEN_UNK: return "TOKEN_UNK";
-    case TOKEN_KEYWORD: return "TOKEN_KEYWORD";
-    case TOKEN_INT_LIT: return "TOKEN_INT_LIT";
-    case TOKEN_STR_LIT: return "TOKEN_STR_LIT";
-    case TOKEN_FLOAT_LIT: return "TOKEN_FLOAT_LIT";
-    case TOKEN_DOUBLE_LIT: return "TOKEN_DOUBLE_LIT";
-    case TOKEN_CHR_LIT: return "TOKEN_CHR_LIT";
-    case TOKEN_IDENT: return "TOKEN_IDENT";
-    case TOKEN_LSQRLY: return "TOKEN_LSQRLY";
-    case TOKEN_RSQRLY: return "TOKEN_RSQRLY";
-    case TOKEN_LPAREN: return "TOKEN_LPAREN";
-    case TOKEN_RPAREN: return "TOKEN_RPAREN";
     default: return "Unknown Token Type";
     }
 }

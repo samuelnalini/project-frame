@@ -1,7 +1,10 @@
 #include "lib/lexer.h"
+#include "lib/parser.h"
+#include "lib/sema.h"
 
 #include <ctype.h>
 #include <stdlib.h>
+#include <stdbool.h>
 
 void init_lexer(Lexer *lexer) {
     if (!lexer) return;
@@ -106,38 +109,50 @@ static Token number(Lexer *lexer) {
 
 	char ch = lexer->buf[lexer->index];
 
-	if (isblank(ch))
+	if (isblank(ch)) {
 	    break; // exit at whitespace
-
-	if (ch == '\n') {
-	    lexer->line++;
-	    break; // increment line and exit at whitespace
+	}
+	    
+	if (ch == '\n' || ch == ';') {
+	    break;
 	}
 	
 	if (isdigit(ch)) {
-	    if (seen_ch)
+	    if (seen_ch) {
+		advance(lexer);
 		return error(lexer, "Invalid number (digit after number type)", line);
+	    }
+
 	    advance(lexer);
 	    continue;
 	}
 
 	if (ch == 'f') {
-	    if (seen_ch)
+	    advance(lexer);
+	    
+	    if (seen_ch) {
 		return error(lexer, "Invalid number type", line);
+	    }
+		
 	    seen_ch = true;
-	    type = TOKEN_FLOAT_LIT;
+	    type = TOKEN_FLOAT_LIT;	    
 	    continue;
 	}
 
 	if (ch == '.') {
-	    if (seen_dot)
+	    advance(lexer);
+	    
+	    if (seen_dot) {
 		return error(lexer, "Invalid number (there are too many decimals)", line);
+	    }
+		
 	    seen_dot = true;
 	    type = TOKEN_DOUBLE_LIT;
 	    continue;
 	}
 
 	if (isalpha(ch)) {
+	    advance(lexer);
 	    return error(lexer, "Invalid char in number", line);
 	}
     }
@@ -218,14 +233,33 @@ static Token identifier(Lexer *lexer) {
 	if (isblank(ch))
 	    break;
 
-	if (ch == '\n') {
+	if (ch == '\n' || ch == ';') {
 	    break;
 	}
 
 	advance(lexer);
     }
+    
+    int length = (lexer->index - start);
+    char string[length + 1];
+    //puts("made it to the seg faulter 5000");
+    snprintf(string, (length + 1), "%.*s", length, &lexer->buf[start]); // does this work
+    
+    if (parser_keyword_match(string)) {
+	return make_token(TOKEN_KEYWORD, &lexer->buf[start], length, line);
+    }
+    
+    if (sema_keyword_match(string)) {
+	return make_token(TOKEN_TYPE, &lexer->buf[start], length, line);
+    }
+    
+    return make_token(TOKEN_IDENT, &lexer->buf[start], length, line);
+}
 
-    return make_token(TOKEN_IDENT, &lexer->buf[start], (lexer->index - start), line);
+static char peek(Lexer *lexer) {
+    if (at_eof(lexer)) return '\0';
+    if (lexer->index + 1 >= strlen(lexer->buf)) return '\0';
+    return lexer->buf[lexer->index + 1];
 }
 
 Token get_token(Lexer *lexer) {
@@ -233,6 +267,8 @@ Token get_token(Lexer *lexer) {
 
     if (at_eof(lexer))
 	return make_token(TOKEN_EOF, &lexer->buf[lexer->index - 1], 0, lexer->line);
+
+    printf("\n------------------------------------------------------\n");
     
     char ch = lexer->buf[lexer->index];
     switch(ch) {
@@ -248,6 +284,99 @@ Token get_token(Lexer *lexer) {
     case '}':
 	advance(lexer);
 	return single_ch_token(lexer, TOKEN_RSQRLY);
+    case ';':
+	advance(lexer);
+	return single_ch_token(lexer, TOKEN_SEMICOLON);
+    case '&':
+	if (peek(lexer) == '&') {
+	    advance(lexer);
+	    return double_ch_token(lexer, TOKEN_AND);
+	}
+
+	return single_ch_token(lexer, TOKEN_BITAND);
+    case '|':
+	if (peek(lexer) == '|') {
+	    advance(lexer);
+	    return double_ch_token(lexer, TOKEN_OR);
+	}
+
+	return single_ch_token(lexer, TOKEN_BITOR);
+    case '+':
+	advance(lexer);
+
+	if (lexer->buf[lexer->index] == '+') {
+	    advance(lexer);
+	    return double_ch_token(lexer, TOKEN_INC);
+	}
+
+	if (lexer->buf[lexer->index] == '=') {
+	    advance(lexer);
+	    return double_ch_token(lexer, TOKEN_PLEQ);
+	}
+	
+	return single_ch_token(lexer, TOKEN_PLUS);
+    case '-':
+	advance(lexer);
+
+	if (lexer->buf[lexer->index] == '-') {
+	    advance(lexer);
+	    return double_ch_token(lexer, TOKEN_DEC);
+	}
+
+	if (lexer->buf[lexer->index] == '=') {
+	    advance(lexer);
+	    return double_ch_token(lexer, TOKEN_MNEQ);
+	}	
+	
+	return single_ch_token(lexer, TOKEN_MINUS);
+    case '!':
+	advance(lexer);
+
+	if (lexer->buf[lexer->index] == '=') {
+	    advance(lexer);
+	    return double_ch_token(lexer, TOKEN_NE);
+	}	
+	
+	return single_ch_token(lexer, TOKEN_NEGATE);
+    case '=':
+	advance(lexer);
+
+	if (lexer->buf[lexer->index] == '=') {
+	    advance(lexer);
+	    return double_ch_token(lexer, TOKEN_EQEQ);
+	}
+	
+	return single_ch_token(lexer, TOKEN_EQ);
+    case '>':
+	advance(lexer);
+
+	if (lexer->buf[lexer->index] == '=') {
+	    advance(lexer);
+	    return double_ch_token(lexer, TOKEN_GE);
+	}
+	
+	return single_ch_token(lexer, TOKEN_GT);
+    case '<':
+	advance(lexer);
+
+	if (lexer->buf[lexer->index] == '=') {
+	    advance(lexer);
+	    return double_ch_token(lexer, TOKEN_LE);
+	}
+	
+	return single_ch_token(lexer, TOKEN_LT);
+    case '/':
+	advance(lexer);
+	return single_ch_token(lexer, TOKEN_SLASH);
+    case '*':
+	advance(lexer);
+	return single_ch_token(lexer, TOKEN_STAR);
+    case '%':
+	advance(lexer);
+	return single_ch_token(lexer, TOKEN_MOD);
+    case '^':
+	advance(lexer);
+	return single_ch_token(lexer, TOKEN_EXP);
     case '"':
 	return string(lexer);
     case '\'':

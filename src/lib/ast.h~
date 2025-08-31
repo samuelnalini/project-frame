@@ -1,0 +1,5 @@
+#pragma once
+
+typedef struct AST_Node() {
+    
+} AST_Node;

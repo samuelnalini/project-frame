@@ -1,0 +1,9 @@
+#pragma once
+
+typedef enum DataType {
+    TYPE_STRING,
+    TYPE_CHAR,
+    TYPE_INT,
+    TYPE_FLOAT,
+    TYPE_DOUBLE,
+} DataType

@@ -14,4 +14,5 @@ add_executable(process
     ${SOURCE}/lexer.c
     ${SOURCE}/parser.c
     ${SOURCE}/file_vec.c
+    ${SOURCE}/sema.c
 )

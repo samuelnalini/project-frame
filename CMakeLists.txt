@@ -15,4 +15,5 @@ add_executable(process
     ${SOURCE}/parser.c
     ${SOURCE}/file_vec.c
     ${SOURCE}/sema.c
+    ${SOURCE}/ast.c
 )

@@ -72,10 +72,135 @@ static bool expect(Parser *parser, TokenType type) {
     return true;
 }
 
+static AST_Node *parse_expr(Parser *parser);
+
+static AST_Node *parse_primary(Parser *parser) {
+    Token token = parser->token;
+
+    if (token.type == TOKEN_TYPE) {
+	parser->token = get_token(parser->lexer);
+	return literal_node(token); // temp
+    }
+
+    if (token.type == TOKEN_IDENT) {
+	parser->token = get_token(parser->lexer);
+	return variable_node(token);
+    }
+
+    
+    if (match(parser, TOKEN_LPAREN)) {
+	AST_Node *expr = parse_expr(parser);
+	expect(parser, TOKEN_RPAREN);
+	return expr;
+    }
+
+    error(parser, "Unexpected token as part of expression", token.line);
+}
+
+static AST_Node *parse_unary(Parser *parser) {
+    switch(parser->token.type) {
+    case TOKEN_PLUS:
+    case TOKEN_MINUS:
+	Token operator = parser->token;
+	parser->token = get_token(parser->lexer);
+	AST_Node *operand = parse_unary(parser);
+	return unary_node(operator, operand);
+    }
+    
+    return parse_primary(parser);
+}
+
+static AST_Node *parse_factor(Parser *parser) {
+    AST_Node *left = parse_unary(parser);
+    AST_Node *node = NULL;
+
+    switch (parser->token.type) {
+    case TOKEN_STAR:
+    case TOKEN_SLASH:
+	Token operator = parser->token;
+	parser->token = get_token(parser->lexer);
+	AST_Node *right = parse_unary(parser);
+	node = binary_node(operator, left, right);
+    }
+    
+    return (node != NULL ? node : left);
+}
+
+// term := (factor ('+' | '-') factor)
+static AST_Node *parse_term(Parser *parser) {
+    AST_Node *left = parse_factor(parser);
+    AST_Node *node = NULL;
+    
+    switch (parser->token.type) {
+    case TOKEN_PLUS:
+    case TOKEN_MINUS:
+	Token operator = parser->token;
+	parser->token = get_token(parser->lexer);
+	AST_Node *right = parse_factor(parser);
+	node = binary_node(operator, left, right);
+    }
+    
+    return (node != NULL ? node : left);
+}
+
+// comparison := (term ('>' | '<' | '<=' | '>=') term)
+static AST_Node *parse_compare(Parser *parser) {
+    AST_Node *left = parse_term(parser);
+    AST_Node *node = NULL;
+
+    switch (parser->token.type) {
+    case TOKEN_GT:
+    case TOKEN_LT:
+    case TOKEN_GE:
+    case TOKEN_LE:
+	Token operator = parser->token;
+	parser->token = get_token(parser->lexer);
+	AST_Node *right = parse_term(parser);
+	node = binary_node(operator, left, right);
+    default:
+	return left;
+    }
+    
+    return node;
+}
+
+// equality := comparison ( '==', '!=' )
+static AST_Node *parse_equal(Parser *parser) {
+    AST_Node *left = parse_compare(parser);
+    AST_Node *node = NULL;
+
+    if (parser->token.type == TOKEN_EQEQ) {
+	Token operator = parser->token;
+
+	parser->token = get_token(parser->lexer);
+    
+	AST_Node *right = parse_compare(parser);
+	node = binary_node(operator, left, right);
+    }
+    
+    return (node != NULL ? node : left);
+}
+
+// assignment := equality ( '=' )
+static AST_Node *parse_assign(Parser *parser) {
+    AST_Node *left = parse_equal(parser);
+    
+    if (!match(parser, TOKEN_EQ)) {
+	return left;
+    }
+
+    AST_Node *right = parse_assign(parser);
+
+    if (left == NULL || left->kind != NODE_VARIABLE) {
+	error(parser, "Invalid assignment target (invalid after the =)", parser->token.line);
+    }
+
+    return assign_node(left, right);
+}
+
+// Lowest to highest priority, starting with assignment (=)
 static AST_Node *parse_expr(Parser *parser) {
-    puts("Expressions have not been implemented yet.");
-    parser->token = get_token(parser->lexer); // consume the equal!
-    return NULL;
+    return parse_assign(parser);
 }
 
 static void parse_stmt(Parser *parser) {
@@ -97,6 +222,7 @@ static void parse_stmt(Parser *parser) {
     
     if (token.type == TOKEN_TYPE) {
 	// var declaration
+	Token type_token = parser->token;
 	parser->token = get_token(parser->lexer); // consume the type
 	
 	Token var_name_token = parser->token;
@@ -118,10 +244,13 @@ static void parse_stmt(Parser *parser) {
 	    return;
 	}
 
-	printf("Declaring %.*s as %s\n",
+	printf("Declaring %.*s (%.*s) as %s\n",
 	       var_name_token.length, var_name_token.start,
-	    "idk yet");
+	       type_token.length, type_token.start,
+	    "?");
 	// declare in sym table
+
+	
     }
 
     // check token type and send to correct function

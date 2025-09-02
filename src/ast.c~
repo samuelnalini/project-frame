@@ -1,0 +1,67 @@
+#include "lib/ast.h"
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+static AST_Node *make_node(NodeType kind, Token token, AST_Node *left, AST_Node *right) {
+    AST_Node *node = malloc(sizeof(AST_Node));
+
+    if (!node) {
+	perror("Call to malloc() failed");
+	return NULL;
+    }
+
+    node->kind = kind;
+    node->token = token;
+    node->left = left;
+    node->right = right;
+    return node;
+}
+
+AST_Node *literal_node(Token token) {
+    return make_node(NODE_LITERAL, token, NULL, NULL);
+}
+
+AST_Node *variable_node(Token token) {
+    return make_node(NODE_VARIABLE, token, NULL, NULL);
+}
+
+AST_Node *unary_node(Token token, AST_Node *operator) {
+    return make_node(NODE_UNARY, token, operator, NULL);
+}
+
+AST_Node *binary_node(Token token, AST_Node *left, AST_Node *right) {
+    return make_node(NODE_BINARY, token, left, right);
+}
+
+AST_Node *assign_node(AST_Node *target, AST_Node *value) {
+    if (!target) return NULL; // has no token
+    return make_node(NODE_ASSIGN, target->token, target, value);
+}
+
+AST_Node return_node(Token token, AST_Node *value) {
+    return make_node(NODE_RETURN, token, value, NULL);
+}
+
+AST_Node expr_stmt_node(AST_Node *expression) {
+    return make_node(NODE_EXPR_STMT, (expr ? expr->token : (Token){0}), expr, NULL);
+}
+
+AST_Node var_decl_node(DataType data_type, Token var_name, AST_Node *init) {
+    AST_Node *node = make_node(NODE_VAR_DECL, var_name, init, NULL);
+
+    if (node)
+	node->expr_type = data_type;
+
+    return node;
+}
+
+void free_node(AST_Node *node) {
+    if (!node) return;
+
+    free_node(node->left);
+    free_node(node->right);
+
+    free(node);
+}

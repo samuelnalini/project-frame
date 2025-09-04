@@ -1,5 +1,9 @@
 #pragma once
 
+#include "file_vec.h"
+#include "lexer.h"
+#include "ast.h"
+
 #include <stdio.h>
 #include <sys/types.h>
 #include <dirent.h>
@@ -8,8 +12,6 @@
 #include <stdlib.h>
 #include <stddef.h>
 
-#include "file_vec.h"
-#include "lexer.h"
 
 size_t get_file_size(FILE *fd);
 DIR *open_dir(char *dir_path);
@@ -18,3 +20,4 @@ int get_files_from_dir(char *dir_path, FILE_VEC *file_vec);
 
 char *append_str(char *dst, const char *src);
 char *get_token_type_str(TokenType type);
+char *get_node_kind_str(NodeType type);

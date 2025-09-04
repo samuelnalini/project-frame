@@ -161,3 +161,18 @@ char *get_token_type_str(TokenType type) {
     default: return "Unknown Token Type";
     }
 }
+
+char *get_node_kind_str(NodeType type) {
+    switch(type) {
+    case NODE_ASSIGN: return "NODE_ASSIGN";
+    case NODE_BINARY: return "NODE_BINARY";
+    case NODE_UNARY: return "NODE_UNARY";
+    case NODE_LITERAL: return "NODE_LITERAL";
+    case NODE_VARIABLE: return "NODE_VARIABLE";
+    case NODE_EQUAL: return "NODE_EQUAL";
+    case NODE_EXPR_STMT: return "NODE_EXPR_STMT";
+    case NODE_VAR_DECL: return "NODE_VAR_DECL";
+    case NODE_RETURN: return "NODE_RETURN";
+    default: return "Unknown Node Kind";
+    }
+}

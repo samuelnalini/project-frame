@@ -77,30 +77,36 @@ static AST_Node *parse_expr(Parser *parser);
 static AST_Node *parse_primary(Parser *parser) {
     Token token = parser->token;
 
-    if (token.type == TOKEN_TYPE) {
-	parser->token = get_token(parser->lexer);
-	return literal_node(token); // temp
-    }
-
-    if (token.type == TOKEN_IDENT) {
-	parser->token = get_token(parser->lexer);
+    switch(token.type) {
+    case TOKEN_TYPE:
+    case TOKEN_INT_LIT:
+    case TOKEN_STR_LIT:
+    case TOKEN_FLOAT_LIT:
+    case TOKEN_DOUBLE_LIT:
+    case TOKEN_CHR_LIT:
+	return literal_node(token);
+    case TOKEN_IDENT:
 	return variable_node(token);
-    }
-
-    
-    if (match(parser, TOKEN_LPAREN)) {
+    case TOKEN_LPAREN:
+	parser->token = get_token(parser->lexer);
 	AST_Node *expr = parse_expr(parser);
 	expect(parser, TOKEN_RPAREN);
+	expect(parser, TOKEN_SEMICOLON);
 	return expr;
     }
 
-    error(parser, "Unexpected token as part of expression", token.line);
+    fprintf(stderr, "Did not expect '%s' in expression on line %d\n",
+	    get_token_type_str(token.type), token.line);
+    //error(parser, "Unexpected token as part of expression", token.line);
 }
 
 static AST_Node *parse_unary(Parser *parser) {
     switch(parser->token.type) {
     case TOKEN_PLUS:
     case TOKEN_MINUS:
+    case TOKEN_NEGATE:
+    case TOKEN_MOD:
+    case TOKEN_EXP:
 	Token operator = parser->token;
 	parser->token = get_token(parser->lexer);
 	AST_Node *operand = parse_unary(parser);
@@ -117,6 +123,8 @@ static AST_Node *parse_factor(Parser *parser) {
     switch (parser->token.type) {
     case TOKEN_STAR:
     case TOKEN_SLASH:
+    case TOKEN_PLEQ:
+    case TOKEN_MNEQ:
 	Token operator = parser->token;
 	parser->token = get_token(parser->lexer);
 	AST_Node *right = parse_unary(parser);
@@ -143,7 +151,7 @@ static AST_Node *parse_term(Parser *parser) {
     return (node != NULL ? node : left);
 }
 
-// comparison := (term ('>' | '<' | '<=' | '>=') term)
+// comparison := (term ('>' | '<' | '<=' | '>=' | '!=') term)
 static AST_Node *parse_compare(Parser *parser) {
     AST_Node *left = parse_term(parser);
     AST_Node *node = NULL;
@@ -153,6 +161,7 @@ static AST_Node *parse_compare(Parser *parser) {
     case TOKEN_LT:
     case TOKEN_GE:
     case TOKEN_LE:
+    case TOKEN_NE:
 	Token operator = parser->token;
 	parser->token = get_token(parser->lexer);
 	AST_Node *right = parse_term(parser);
@@ -194,7 +203,7 @@ static AST_Node *parse_assign(Parser *parser) {
     if (left == NULL || left->kind != NODE_VARIABLE) {
 	error(parser, "Invalid assignment target (invalid after the =)", parser->token.line);
     }
-
+    
     return assign_node(left, right);
 }
 
@@ -235,6 +244,7 @@ static void parse_stmt(Parser *parser) {
 	AST_Node *init = NULL;
 	if (match(parser, TOKEN_EQ)) {
 	    init = parse_expr(parser);
+	    parser->token = get_token(parser->lexer);
 	}
 
 	// should be a semi colon
@@ -247,7 +257,7 @@ static void parse_stmt(Parser *parser) {
 	printf("Declaring %.*s (%.*s) as %s\n",
 	       var_name_token.length, var_name_token.start,
 	       type_token.length, type_token.start,
-	    "?");
+	       (init ? get_node_kind_str(init->kind) : "NULL"));
 	// declare in sym table
 
 	

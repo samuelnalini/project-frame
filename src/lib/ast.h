@@ -23,7 +23,7 @@ typedef struct AST_Node {
     struct AST_Node *right;
 /*    
     union {
-	// PE MD AS
+	// PEMDAS
 	struct {struct AST_Node *left; struct AST_Node *right;} assign;
     };
 */

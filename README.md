@@ -1,8 +1,9 @@
+
 # Front-End Web Framework
 
 # Goal
 
-A simple, lightweight framework that allows developers to create and modify *Components*
+Honestly I haven't really decided what this will be yet.
 
 # Components
 

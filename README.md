@@ -37,3 +37,4 @@ ${MyComponent}
 
 
 This project is on the backburner a bit as I'm working on learning new concepts in C. I did not abandon it.
+Furthermore, I've been moving for the last week so I have not had the internet connection to push.

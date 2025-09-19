@@ -1,5 +1,5 @@
 
-# Front-End Web Framework
+# Project Framework
 
 # Goal
 
